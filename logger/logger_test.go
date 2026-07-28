@@ -49,7 +49,7 @@ type TestCase struct {
 }
 
 func TestLogger(t *testing.T) {
-	var testFields = []zap.Field{
+	testFields := []zap.Field{
 		zap.String("string", "smileEveryday"),
 		zap.Int("integer", 300),
 		zap.Object("objMarshaleld", MarshalEvent{
@@ -201,7 +201,6 @@ func captureStdErr(f func()) string {
 }
 
 func BenchmarkMarshaled(b *testing.B) {
-
 	MustSetupGlobal(WithConfiguration(
 		CoreOptions{
 			OutputPath: "stderr",
@@ -210,8 +209,7 @@ func BenchmarkMarshaled(b *testing.B) {
 		},
 	))
 
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
+	for b.Loop() {
 		L().Info("", zap.Object("objMarshaleld", MarshalEvent{
 			Code:   "500",
 			Ip:     "127.0.0.1",
@@ -223,7 +221,6 @@ func BenchmarkMarshaled(b *testing.B) {
 }
 
 func BenchmarkReflected(b *testing.B) {
-
 	MustSetupGlobal(WithConfiguration(
 		CoreOptions{
 			OutputPath: "stderr",
@@ -232,9 +229,7 @@ func BenchmarkReflected(b *testing.B) {
 		},
 	))
 
-	b.ResetTimer()
-
-	for i := 0; i < b.N; i++ {
+	for b.Loop() {
 		L().Info("", zap.Reflect("objReflected", ReflectEvent{
 			Code:   "500",
 			Ip:     "127.0.0.1",
@@ -243,11 +238,9 @@ func BenchmarkReflected(b *testing.B) {
 		}))
 		_ = L().Sync()
 	}
-
 }
 
 func BenchmarkMarshaledConsole(b *testing.B) {
-
 	MustSetupGlobal(WithConfiguration(
 		CoreOptions{
 			OutputPath: "stderr",
@@ -256,8 +249,7 @@ func BenchmarkMarshaledConsole(b *testing.B) {
 		},
 	))
 
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
+	for b.Loop() {
 		L().Info("", zap.Object("objMarshaleld", MarshalEvent{
 			Code:   "500",
 			Ip:     "127.0.0.1",
@@ -269,7 +261,6 @@ func BenchmarkMarshaledConsole(b *testing.B) {
 }
 
 func BenchmarkReflectedConsole(b *testing.B) {
-
 	MustSetupGlobal(WithConfiguration(
 		CoreOptions{
 			OutputPath: "stderr",
@@ -278,9 +269,7 @@ func BenchmarkReflectedConsole(b *testing.B) {
 		},
 	))
 
-	b.ResetTimer()
-
-	for i := 0; i < b.N; i++ {
+	for b.Loop() {
 		L().Info("", zap.Reflect("objReflected", ReflectEvent{
 			Code:   "500",
 			Ip:     "127.0.0.1",
@@ -289,5 +278,4 @@ func BenchmarkReflectedConsole(b *testing.B) {
 		}))
 		_ = L().Sync()
 	}
-
 }

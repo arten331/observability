@@ -16,8 +16,6 @@ func ExtractResponseSpan(ctx context.Context, r *http.Response) context.Context 
 
 func InjectRequestSpan(ctx context.Context, r *http.Request) {
 	otel.GetTextMapPropagator().Inject(ctx, propagation.HeaderCarrier(r.Header))
-
-	return
 }
 
 func ExtractRequestSpan(r *http.Request) *http.Request {

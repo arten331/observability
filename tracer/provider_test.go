@@ -1,7 +1,6 @@
 package tracer
 
 import (
-	"context"
 	"testing"
 
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
@@ -12,10 +11,10 @@ func TestNewProviderRequiresServiceNameAndExporter(t *testing.T) {
 	t.Parallel()
 
 	exporter := tracetest.NewInMemoryExporter()
-	if _, err := NewProvider(context.Background(), Config{}, exporter); err == nil {
+	if _, err := NewProvider(t.Context(), Config{}, exporter); err == nil {
 		t.Error("NewProvider() error = nil, want service name validation error")
 	}
-	if _, err := NewProvider(context.Background(), Config{ServiceName: "worker"}, nil); err == nil {
+	if _, err := NewProvider(t.Context(), Config{ServiceName: "worker"}, nil); err == nil {
 		t.Error("NewProvider() error = nil, want exporter validation error")
 	}
 }
@@ -24,7 +23,7 @@ func TestNewProviderFlushesAndShutsDown(t *testing.T) {
 	t.Parallel()
 
 	exporter := tracetest.NewInMemoryExporter()
-	provider, err := NewProvider(context.Background(), Config{
+	provider, err := NewProvider(t.Context(), Config{
 		ServiceName: "worker",
 		Sampler:     sdktrace.AlwaysSample(),
 	}, exporter)
@@ -32,15 +31,15 @@ func TestNewProviderFlushesAndShutsDown(t *testing.T) {
 		t.Fatalf("NewProvider() error = %v", err)
 	}
 
-	_, span := provider.Tracer("test").Start(context.Background(), "run")
+	_, span := provider.Tracer("test").Start(t.Context(), "run")
 	span.End()
-	if err := provider.ForceFlush(context.Background()); err != nil {
+	if err := provider.ForceFlush(t.Context()); err != nil {
 		t.Fatalf("ForceFlush() error = %v", err)
 	}
 	if got := len(exporter.GetSpans()); got != 1 {
 		t.Errorf("exported spans = %d, want 1", got)
 	}
-	if err := provider.Shutdown(context.Background()); err != nil {
+	if err := provider.Shutdown(t.Context()); err != nil {
 		t.Fatalf("Shutdown() error = %v", err)
 	}
 }

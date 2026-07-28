@@ -36,7 +36,7 @@ func (p *ValuesPropagator) Extract(ctx context.Context, reader workflow.HeaderRe
 		return ctx, err
 	}
 
-	return context.WithValue(ctx, KeyContextAttributes, fields), nil
+	return context.WithValue(ctx, contextAttributesKey, fields), nil
 }
 
 func (p *ValuesPropagator) ExtractToWorkflow(ctx workflow.Context, reader workflow.HeaderReader) (workflow.Context, error) {
@@ -45,7 +45,7 @@ func (p *ValuesPropagator) ExtractToWorkflow(ctx workflow.Context, reader workfl
 		return ctx, err
 	}
 
-	return workflow.WithValue(ctx, KeyContextAttributes, fields), nil
+	return workflow.WithValue(ctx, contextAttributesKey, fields), nil
 }
 
 func injectFields(fields []zap.Field, writer workflow.HeaderWriter) error {

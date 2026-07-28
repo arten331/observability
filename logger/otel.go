@@ -29,14 +29,17 @@ func appendField(attrs []attribute.KeyValue, f zapcore.Field) []attribute.KeyVal
 		attr := attribute.Bool(f.Key, f.Integer == 1)
 		return append(attrs, attr)
 
-	case zapcore.Int8Type, zapcore.Int16Type, zapcore.Int32Type, zapcore.Int64Type,
-		zapcore.Uint32Type, zapcore.Uint8Type, zapcore.Uint16Type, zapcore.Uint64Type,
-		zapcore.UintptrType:
+	case zapcore.Int8Type, zapcore.Int16Type, zapcore.Int32Type, zapcore.Int64Type:
 		attr := attribute.Int64(f.Key, f.Integer)
+		return append(attrs, attr)
+	case zapcore.Uint8Type, zapcore.Uint16Type, zapcore.Uint32Type, zapcore.Uint64Type, zapcore.UintptrType:
+		value := strconv.FormatUint(uint64(f.Integer), 10) //nolint:gosec // Zap stores unsigned field values in Integer's bit pattern.
+		attr := attribute.String(f.Key, value)
 		return append(attrs, attr)
 
 	case zapcore.Float32Type, zapcore.Float64Type:
-		attr := attribute.Float64(f.Key, math.Float64frombits(uint64(f.Integer)))
+		value := math.Float64frombits(uint64(f.Integer)) //nolint:gosec // Zap stores float64 values in Integer's bit pattern.
+		attr := attribute.Float64(f.Key, value)
 		return append(attrs, attr)
 
 	case zapcore.Complex64Type:
@@ -104,7 +107,7 @@ func appendField(attrs []attribute.KeyValue, f zapcore.Field) []attribute.KeyVal
 	}
 }
 
-func Attribute(key string, value interface{}) attribute.KeyValue {
+func Attribute(key string, value any) attribute.KeyValue {
 	switch value := value.(type) {
 	case nil:
 		return attribute.String(key, "<nil>")
@@ -115,7 +118,7 @@ func Attribute(key string, value interface{}) attribute.KeyValue {
 	case int64:
 		return attribute.Int64(key, value)
 	case uint64:
-		return attribute.Int64(key, int64(value))
+		return attribute.String(key, strconv.FormatUint(value, 10))
 	case float64:
 		return attribute.Float64(key, value)
 	case bool:

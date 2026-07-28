@@ -1,23 +1,3 @@
-// Copyright (c) 2016 Uber Technologies, Inc.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files (the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions:
-//
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
-
 package oculus_enc
 
 import (
@@ -29,7 +9,7 @@ import (
 	"time"
 	"unicode/utf8"
 
-	"github.com/Arten331/observability/logger/oculus_enc/bufferpool"
+	"github.com/arten331/observability/logger/oculus_enc/bufferpool"
 	"go.uber.org/zap/buffer"
 	"go.uber.org/zap/zapcore"
 )
@@ -346,7 +326,7 @@ func (enc *oculusEncoder) AppendUintptr(v uintptr)        { enc.AppendUint64(uin
 
 func (enc *oculusEncoder) Clone() zapcore.Encoder {
 	clone := enc.clone()
-	clone.buf.Write(enc.buf.Bytes())
+	clone.buf.AppendBytes(enc.buf.Bytes())
 	return clone
 }
 
@@ -357,10 +337,6 @@ func (enc *oculusEncoder) clone() *oculusEncoder {
 	clone.openNamespaces = enc.openNamespaces
 	clone.buf = bufferpool.Get()
 	return clone
-}
-
-func (enc *oculusEncoder) truncate() {
-	enc.buf.Reset()
 }
 
 func (enc *oculusEncoder) closeOpenNamespaces() {
@@ -442,7 +418,7 @@ func (enc *oculusEncoder) safeAddByteString(s []byte) {
 			i++
 			continue
 		}
-		enc.buf.Write(s[i : i+size])
+		enc.buf.AppendBytes(s[i : i+size])
 		i += size
 	}
 }

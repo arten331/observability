@@ -17,6 +17,21 @@ type PrometheusService interface {
 	AddMiddleware(func(handler http.Handler) http.Handler)
 }
 
+type MetricsRegistry interface {
+	Register(prometheus.Collector) error
+	RegisterService(MetricableService) error
+	RegisterServices([]MetricableService) error
+}
+
+type MetricsHandler interface {
+	Handler() http.HandlerFunc
+}
+
+var (
+	_ MetricsRegistry = Service{}
+	_ MetricsHandler  = Service{}
+)
+
 type Service struct {
 	registry *prometheus.Registry
 	handler  http.HandlerFunc
@@ -51,6 +66,16 @@ func (p Service) RegisterService(s MetricableService) error {
 	for _, metric := range metrics {
 		err := p.registry.Register(metric)
 		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (p Service) RegisterServices(services []MetricableService) error {
+	for _, service := range services {
+		if err := p.RegisterService(service); err != nil {
 			return err
 		}
 	}

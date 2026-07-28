@@ -3,36 +3,36 @@ package kafka
 import (
 	"context"
 
-	"github.com/Arten331/observability/tracer"
+	"github.com/arten331/observability/tracer"
 	"github.com/segmentio/kafka-go"
 	"go.opentelemetry.io/otel/trace"
 )
 
+const (
+	spanIDHeader  = "span-id"
+	traceIDHeader = "trace-id"
+)
+
 func GetSpanFromKafkaMessage(ctx context.Context, msg kafka.Message) (context.Context, trace.Span) {
-	// get span context from kafka message headers
 	var spanID trace.SpanID
 	var traceID trace.TraceID
-	var counter int
-	var err error
 
 	for i := range msg.Headers {
 		switch msg.Headers[i].Key {
-		case "span-id":
-			spanID, err = trace.SpanIDFromHex(string(msg.Headers[i].Value))
-			counter++
-			if err != nil {
-				break
+		case spanIDHeader:
+			parsedSpanID, err := trace.SpanIDFromHex(string(msg.Headers[i].Value))
+			if err == nil {
+				spanID = parsedSpanID
 			}
-		case "trace-id":
-			traceID, err = trace.TraceIDFromHex(string(msg.Headers[i].Value))
-			counter++
-			if err != nil {
-				break
+		case traceIDHeader:
+			parsedTraceID, err := trace.TraceIDFromHex(string(msg.Headers[i].Value))
+			if err == nil {
+				traceID = parsedTraceID
 			}
 		}
 	}
 
-	if counter == 2 {
+	if spanID.IsValid() && traceID.IsValid() {
 		spanContext := trace.NewSpanContext(trace.SpanContextConfig{
 			TraceID: traceID,
 			SpanID:  spanID,
@@ -49,11 +49,11 @@ func InjectSpanToKafkaMessages(ctx context.Context, queueMessages []kafka.Messag
 		for i := range queueMessages {
 			queueMessages[i].Headers = []kafka.Header{
 				{
-					Key:   "span-id",
+					Key:   spanIDHeader,
 					Value: []byte(spanHeader.SpanID().String()),
 				},
 				{
-					Key:   "trace-id",
+					Key:   traceIDHeader,
 					Value: []byte(spanHeader.TraceID().String()),
 				},
 			}

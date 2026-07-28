@@ -5,10 +5,11 @@ import (
 
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/trace"
+	"go.opentelemetry.io/otel/trace/noop"
 )
 
 var (
-	tracer      = trace.NewNoopTracerProvider().Tracer("")
+	tracer      = noop.NewTracerProvider().Tracer("")
 	serviceName = "unknown"
 )
 

@@ -9,7 +9,7 @@ Zap-based logging, OpenTelemetry tracing, and Temporal bindings for Go services.
 - Temporal client and worker interceptors that propagate OpenTelemetry trace context.
 - Oculus field propagation across Temporal workflow and activity boundaries.
 
-The old direct Jaeger setup remains for source compatibility. New services should export OTLP to an OpenTelemetry Collector instead.
+Services should export OTLP to an OpenTelemetry Collector.
 
 ## OpenTelemetry startup
 

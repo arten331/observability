@@ -2,9 +2,8 @@ package logger
 
 import (
 	"context"
-	"sync"
 
-	"github.com/Arten331/observability/tracer"
+	"github.com/arten331/observability/tracer"
 	"go.temporal.io/sdk/workflow"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
@@ -17,9 +16,12 @@ const (
 	KeyContextAttributes = "x_trace_attrs"
 )
 
+type contextKey string
+
+const contextAttributesKey contextKey = KeyContextAttributes
+
 type LContext struct {
 	Context
-	mu                sync.Mutex
 	PersistAttributes []zap.Field
 }
 
@@ -27,12 +29,12 @@ type Context interface {
 	Value(key any) any
 }
 
-func WithCtxValue(ctx Context, key, value interface{}) Context {
-	switch ctx.(type) {
+func WithCtxValue(ctx Context, key, value any) Context {
+	switch ctx := ctx.(type) {
 	case context.Context:
-		return context.WithValue(ctx.(context.Context), key, value)
+		return context.WithValue(ctx, key, value)
 	case workflow.Context:
-		return workflow.WithValue(ctx.(workflow.Context), key, value)
+		return workflow.WithValue(ctx, key, value)
 	default:
 		L().Error("!IMPORTANT: wrong context for logger", zap.Reflect("obj", ctx))
 
@@ -62,8 +64,8 @@ func getContext(ctx Context) *LContext {
 	if !ok {
 		var persistAttributes []zap.Field
 
-		//try to find attributes in value and restore
-		persistAttributesRaw := ctx.Value(KeyContextAttributes)
+		// try to find attributes in value and restore
+		persistAttributesRaw := ctx.Value(contextAttributesKey)
 
 		if persistAttributesRaw == nil {
 			persistAttributes = make([]zap.Field, 0)
@@ -72,7 +74,7 @@ func getContext(ctx Context) *LContext {
 		}
 
 		lCtx = &LContext{
-			Context:           WithCtxValue(ctx, KeyContextAttributes, persistAttributes),
+			Context:           WithCtxValue(ctx, contextAttributesKey, persistAttributes),
 			PersistAttributes: persistAttributes,
 		}
 	}
@@ -87,7 +89,7 @@ func TraceWithID(ctx context.Context, key string, value string) context.Context 
 	span.SetAttributes(otelAttributes(fields...)...)
 
 	lCtx := checkAndAppendFieldToCtx(ctx, fields)
-	lCtx.Context = WithCtxValue(ctx, KeyContextAttributes, lCtx.PersistAttributes)
+	lCtx.Context = WithCtxValue(ctx, contextAttributesKey, lCtx.PersistAttributes)
 
 	return lCtx.Context.(context.Context)
 }
@@ -110,7 +112,7 @@ func checkAndAppendFieldToCtx(ctx Context, fields []zap.Field) *LContext {
 		exists := false
 		for _, existingField := range lCtx.PersistAttributes {
 			if existingField.Key == field.Key {
-				//lCtx.PersistAttributes[i] = field
+				// lCtx.PersistAttributes[i] = field
 				exists = true
 				break
 			}
@@ -121,7 +123,7 @@ func checkAndAppendFieldToCtx(ctx Context, fields []zap.Field) *LContext {
 		}
 	}
 
-	lCtx.Context = WithCtxValue(lCtx.Context, KeyContextAttributes, lCtx.PersistAttributes)
+	lCtx.Context = WithCtxValue(lCtx.Context, contextAttributesKey, lCtx.PersistAttributes)
 
 	return lCtx
 }

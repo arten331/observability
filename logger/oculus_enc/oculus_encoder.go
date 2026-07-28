@@ -16,7 +16,7 @@ func (enc *oculusEncoder) EncodeEntry(ent zapcore.Entry, fields []zapcore.Field)
 
 	if enc.buf.Len() > 0 {
 		final.addElementSeparator()
-		final.buf.Write(enc.buf.Bytes())
+		final.buf.AppendBytes(enc.buf.Bytes())
 	}
 
 	final.addKey("record")

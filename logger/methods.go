@@ -3,7 +3,7 @@ package logger
 import (
 	"context"
 
-	"github.com/Arten331/observability/tracer"
+	"github.com/arten331/observability/tracer"
 	"go.opentelemetry.io/otel/codes"
 	"go.opentelemetry.io/otel/trace"
 	"go.temporal.io/sdk/workflow"

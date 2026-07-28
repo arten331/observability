@@ -1,8 +1,8 @@
 package temporal
 
 import (
-	"github.com/Arten331/observability/logger"
-	"github.com/Arten331/observability/tracer"
+	"github.com/arten331/observability/logger"
+	"github.com/arten331/observability/tracer"
 	"go.opentelemetry.io/otel"
 	"go.temporal.io/sdk/client"
 	temporalotel "go.temporal.io/sdk/contrib/opentelemetry"

@@ -5,7 +5,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/Arten331/observability/logger/oculus_enc"
+	"github.com/arten331/observability/logger/oculus_enc"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 	"gopkg.in/natefinch/lumberjack.v2"
@@ -196,7 +196,7 @@ func WithConfiguration(o CoreOptions) Configuration {
 
 		if l.Logger != nil {
 			core = zapcore.NewTee(
-				l.Logger.Core(),
+				l.Core(),
 				zapcore.NewCore(encoder, wr, dLevel),
 			)
 		}
@@ -223,9 +223,9 @@ func CurrentDefault() *Logger {
 }
 
 func setupLoggers(l *Logger) {
-	l.SugaredLogger = l.Logger.Sugar()
-	l.ErrorLogger = zap.New(l.Logger.Core(), zap.AddCallerSkip(1), zap.WithCaller(true))
-	l.CtxLogger = zap.New(l.Logger.Core(), zap.AddCallerSkip(1))
+	l.SugaredLogger = l.Sugar()
+	l.ErrorLogger = zap.New(l.Core(), zap.AddCallerSkip(1), zap.WithCaller(true))
+	l.CtxLogger = zap.New(l.Core(), zap.AddCallerSkip(1))
 }
 
 func WithFields(fields ...zap.Field) *Logger {

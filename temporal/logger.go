@@ -4,7 +4,7 @@ package temporal
 import (
 	"fmt"
 
-	"github.com/Arten331/observability/logger"
+	"github.com/arten331/observability/logger"
 	temporallog "go.temporal.io/sdk/log"
 	"go.uber.org/zap"
 )
