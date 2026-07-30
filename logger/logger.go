@@ -222,6 +222,18 @@ func CurrentDefault() *Logger {
 	return &_dLogger
 }
 
+// Named returns a child logger with name appended to every supported logger view.
+// The receiver is not mutated, so it is safe to use for scoped dependency injection.
+func (l *Logger) Named(name string) *Logger {
+	named := *l
+	named.Logger = l.Logger.Named(name)
+	named.SugaredLogger = l.SugaredLogger.Named(name)
+	named.CtxLogger = l.CtxLogger.Named(name)
+	named.ErrorLogger = l.ErrorLogger.Named(name)
+
+	return &named
+}
+
 func setupLoggers(l *Logger) {
 	l.SugaredLogger = l.Sugar()
 	l.ErrorLogger = zap.New(l.Core(), zap.AddCallerSkip(1), zap.WithCaller(true))

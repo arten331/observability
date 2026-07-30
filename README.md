@@ -19,6 +19,15 @@ starts OTLP and shuts down the provider with the Fx lifecycle.
 `metrics.Module()` registers every `metrics.MetricableService` supplied in the
 `metricable_services` value group.
 
+Name loggers at module boundaries with an Fx decorator. `Named` returns a new
+logger and preserves the parent logger, so nested module names compose safely:
+
+```go
+fx.Decorate(func(log *logger.Logger) *logger.Logger {
+	return log.Named("delivery.temporal")
+})
+```
+
 Provide the configuration values in the composition root, then include the
 modules in the Fx app:
 
